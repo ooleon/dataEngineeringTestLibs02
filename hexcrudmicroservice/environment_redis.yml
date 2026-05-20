@@ -1,0 +1,16 @@
+name: hex-crud-env
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.11
+  - redis>=5.0.0
+  - pip
+  - pip:
+      - fastapi
+      - uvicorn
+      - pydantic
+      - pydantic-settings
+      - structlog
+      - aiokafka
+      - elasticsearch[async]

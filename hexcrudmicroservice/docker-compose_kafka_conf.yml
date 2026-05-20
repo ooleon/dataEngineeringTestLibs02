@@ -1,0 +1,40 @@
+#version: "3.9"
+
+services:
+  kafka:
+    image: confluentinc/cp-kafka:7.6.0
+    container_name: kafka-broker
+    hostname: kafka
+    environment:
+      # === KRaft Mode (Sin ZooKeeper) ===
+      - KAFKA_NODE_ID=1
+      - KAFKA_BROKER_ID=1
+      # === Cluster ID (OBLIGATORIO - genera uno único) ===
+      - CLUSTER_ID=MkU3OEVBNTcwNTJENDM2kQ
+      - KAFKA_CLUSTER_ID=MkU3OEVBNTcwNTJENDM2kQ
+      - KAFKA_PROCESS_ROLES=broker,controller
+      - KAFKA_CONTROLLER_QUORUM_VOTERS=1@kafka:9093
+      - KAFKA_LISTENERS=PLAINTEXT://:9092,CONTROLLER://:9093
+      - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092
+      - KAFKA_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      - KAFKA_CONTROLLER_LISTENER_NAMES=CONTROLLER
+      - KAFKA_INTER_BROKER_LISTENER_NAME=PLAINTEXT
+      # === Replicación para single-node ===
+      - KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=1
+      - KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR=1
+      - KAFKA_TRANSACTION_STATE_LOG_MIN_ISR=1
+      # === Desarrollo ===
+      - KAFKA_LOG_RETENTION_HOURS=24
+      - KAFKA_AUTO_CREATE_TOPICS_ENABLE=true
+    healthcheck:
+      test: ["CMD-SHELL", "kafka-topics --bootstrap-server localhost:9092 --list || exit 1"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 45s  # Confluent JVM necesita más tiempo para iniciar KRaft
+    networks: [app_net]
+
+networks:
+  app_net:
+    driver: bridge
+    name: hex-crud-net
